@@ -38,10 +38,10 @@ jobs:
     steps:
       # https://github.com/docker/setup-qemu-action
       # https://github.com/docker/setup-buildx-action#with-qemu
-      #- name: Set up QEMU
-      #  uses: docker/setup-qemu-action@v1
-      #  with:
-      #    platforms: arm64
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
 
       # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
@@ -94,7 +94,7 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
 
           #platforms: linux/amd64,linux/arm64
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
 
           target: production
 
@@ -133,7 +133,7 @@ jobs:
           labels: ${{ steps.development-metadata.outputs.labels }}
 
           #platforms: linux/amd64,linux/arm64
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
 
           target: development
 

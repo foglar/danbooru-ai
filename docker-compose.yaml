@@ -13,6 +13,37 @@
 #
 # See below for more commands for running your instance.
 #
+# ## ARM64 / Raspberry Pi 5 Quickstart
+#
+# The Docker images are published for both linux/amd64 and linux/arm64, so you can run Danbooru
+# on a Raspberry Pi 5 (or any other ARM64 device) using the same docker-compose.yaml file.
+#
+# Prerequisites:
+#   - Raspberry Pi 5 running a 64-bit OS (e.g. Raspberry Pi OS 64-bit or Ubuntu 24.04 for RPi)
+#   - Docker Engine 24.0+ and Docker Compose V2 installed
+#
+# Installation steps on Raspberry Pi 5:
+#
+#  # 1. Install Docker (if not already installed):
+#  curl -fsSL https://get.docker.com | sh
+#  sudo usermod -aG docker $USER   # allow running docker without sudo
+#  newgrp docker                   # apply the group change without logging out
+#
+#  # 2. Clone the repository and enter the directory:
+#  git clone https://github.com/danbooru/danbooru
+#  cd danbooru
+#
+#  # 3. Create the required (initially empty) config files:
+#  touch .env.local config/danbooru_local_config.rb
+#
+#  # 4. Start Danbooru (Docker will automatically pull the linux/arm64 image):
+#  docker compose up -d
+#
+# Danbooru will now be available at http://<raspberry-pi-ip>:3000.
+#
+# To stop:   docker compose down
+# To update: docker compose pull && docker compose up -d
+#
 # ## Configuration
 #
 # To configure your instance, edit the files `.env.local` or `config/danbooru_local_config.rb`
