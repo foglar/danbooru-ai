@@ -103,9 +103,11 @@ EOS
 # Build MozJPEG. Output is in /usr/local.
 FROM build-base AS build-mozjpeg
 ARG MOZJPEG_VERSION
-ARG MOZJPEG_BUILD_DEPS="cmake nasm libpng-dev zlib1g-dev"
+ARG MOZJPEG_BUILD_DEPS="cmake libpng-dev zlib1g-dev"
 RUN <<EOS
   apt-get install -y --no-install-recommends $MOZJPEG_BUILD_DEPS
+  # nasm is only available on amd64; on other architectures it is silently skipped.
+  dpkg --print-architecture | grep -q amd64 && apt-get install -y --no-install-recommends nasm || true
   curl -L "https://github.com/mozilla/mozjpeg/archive/refs/tags/v${MOZJPEG_VERSION}.tar.gz" | tar --strip-components=1 -xzvf -
 
   cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DENABLE_STATIC=0 -DWITH_ARITH_ENC=1 -DWITH_ARITH_DEC=1 .
@@ -141,7 +143,7 @@ EOS
 # Build FFmpeg. Output is in /usr/local.
 FROM build-base AS build-ffmpeg
 ARG FFMPEG_VERSION
-ARG FFMPEG_BUILD_DEPS="nasm libx264-dev libx265-dev libsvtav1enc-dev libvpx-dev libdav1d-dev zlib1g-dev"
+ARG FFMPEG_BUILD_DEPS="libx264-dev libx265-dev libsvtav1enc-dev libvpx-dev libdav1d-dev zlib1g-dev"
 ARG FFMPEG_BUILD_OPTIONS="\
   --disable-ffplay --disable-network --disable-doc --disable-static --enable-shared --enable-gpl \
   --enable-libx264 --enable-libx265 --enable-libsvtav1 --enable-libvpx --enable-libdav1d --enable-zlib \
@@ -169,6 +171,8 @@ ARG FFMPEG_BUILD_OPTIONS="\
 
 RUN <<EOS
   apt-get install -y --no-install-recommends $FFMPEG_BUILD_DEPS
+  # nasm is only available on amd64; on other architectures it is silently skipped.
+  dpkg --print-architecture | grep -q amd64 && apt-get install -y --no-install-recommends nasm || true
   curl -L "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n${FFMPEG_VERSION}.tar.gz" | tar --strip-components=1 -xzvf -
 
   ./configure $FFMPEG_BUILD_OPTIONS
@@ -236,7 +240,13 @@ ARG NODE_VERSION
 RUN <<EOS
   apt-get install -y --no-install-recommends xz-utils
 
-  curl -L https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz | tar --strip-components=1 -xJvf -
+  ARCH=$(dpkg --print-architecture)
+  case "$ARCH" in
+    amd64)  NODE_ARCH="x64" ;;
+    arm64)  NODE_ARCH="arm64" ;;
+    *)      echo "Unsupported architecture: $ARCH" >&2; exit 1 ;;
+  esac
+  curl -L https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz | tar --strip-components=1 -xJvf -
 
   cp -rdv ./bin /usr/local
   cp -rdv ./lib /usr/local

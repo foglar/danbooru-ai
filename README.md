@@ -34,6 +34,25 @@ touch .env.local config/danbooru_local_config.rb
 sudo docker compose up
 ```
 
+#### Raspberry Pi 5 / ARM64
+
+Docker images are published for both `linux/amd64` and `linux/arm64`, so you can run Danbooru on a Raspberry Pi 5 (or any other 64-bit ARM device). The same `docker-compose.yaml` works on ARM — Docker automatically pulls the correct image for your architecture.
+
+```sh
+# Install Docker (if not already installed)
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Clone the repo and start Danbooru
+git clone https://github.com/danbooru/danbooru
+cd danbooru
+touch .env.local config/danbooru_local_config.rb
+docker compose up -d
+```
+
+Danbooru will be available at `http://<raspberry-pi-ip>:3000`.
+
 When you're done, you can run the following to delete everything:
 
 ```sh
